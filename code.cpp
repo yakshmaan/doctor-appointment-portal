@@ -2,6 +2,7 @@
 #include<string>
 #include<vector>
 #include<stdexcept>
+#include<fstream>
 using namespace std;
 
 //CLASSES
@@ -153,16 +154,108 @@ int readInt(){
 
 // FILE HANDELING(WILL BE DONE LATER PROPERLY)
 
-
 void saveAll() {
-    // will write file saving at the end
+
+    // Save doctor records
+    ofstream doctorFile("doctors.txt");
+
+    for (int i = 0; i < doctors.size(); i++) {
+        doctorFile << doctors[i].getId() << " "
+                   << doctors[i].getName() << " "
+                   << doctors[i].getUsername() << " "
+                   << doctors[i].getPassword() << " "
+                   << doctors[i].getSpecialization() << "\n";
+    }
+
+    doctorFile.close();
+
+
+    // Save patient records
+    ofstream patientFile("patients.txt");
+
+    for (int i = 0; i < patients.size(); i++) {
+        patientFile << patients[i].getId() << " "
+                    << patients[i].getName() << " "
+                    << patients[i].getUsername() << " "
+                    << patients[i].getPassword() << " "
+                    << patients[i].getAge() << "\n";
+    }
+
+    patientFile.close();
+
+
+    // Save appointment records
+    ofstream appointmentFile("appointments.txt");
+
+    for (int i = 0; i < appointments.size(); i++) {
+        appointmentFile << appointments[i].getId() << " "
+                        << appointments[i].getPatientId() << " "
+                        << appointments[i].getDoctorId() << " "
+                        << appointments[i].getDate() << " "
+                        << appointments[i].getSlot() << " "
+                        << appointments[i].isActive() << "\n";
+    }
+
+    appointmentFile.close();
 }
 
 void loadAll() {
-    // temporary default doctors 
-    doctors.push_back(Doctor(nextDoctorId++, "Meera_Sharma", "meera", "doc123", "Cardiology"));
-    doctors.push_back(Doctor(nextDoctorId++, "Arjun_Singh", "arjun", "doc123", "Dermatology"));
-    doctors.push_back(Doctor(nextDoctorId++, "Kavita_Rao", "kavita", "doc123", "Pediatrics"));
+
+    // Load doctor records
+    ifstream doctorFile("doctors.txt");
+
+    if (doctorFile.is_open()) {
+        int id;
+        string name, username, password, spec;
+
+        while (doctorFile >> id >> name >> username >> password >> spec) {
+            doctors.push_back(Doctor(id, name, username, password, spec));
+
+            if (id >= nextDoctorId)
+                nextDoctorId = id + 1;
+        }
+
+        doctorFile.close();
+    }
+    else {
+        doctors.push_back(Doctor(nextDoctorId++, "Meera_Sharma", "meera", "doc123", "Cardiology"));
+        doctors.push_back(Doctor(nextDoctorId++, "Arjun_Singh", "arjun", "doc123", "Dermatology"));
+        doctors.push_back(Doctor(nextDoctorId++, "Kavita_Rao", "kavita", "doc123", "Pediatrics"));
+
+        saveAll();
+    }
+
+
+    // Load patient records
+    ifstream patientFile("patients.txt");
+
+    int pid, age;
+    string pname, username, password;
+
+    while (patientFile >> pid >> pname >> username >> password >> age) {
+        patients.push_back(Patient(pid, pname, username, password, age));
+
+        if (pid >= nextPatientId)
+            nextPatientId = pid + 1;
+    }
+
+    patientFile.close();
+
+
+    // Load appointment records
+    ifstream appointmentFile("appointments.txt");
+
+    int aid, patientId, doctorId, active;
+    string date, slot;
+
+    while (appointmentFile >> aid >> patientId >> doctorId >> date >> slot >> active) {
+        appointments.push_back(Appointment(aid, patientId, doctorId, date, slot, active));
+
+        if (aid >= nextApptId)
+            nextApptId = aid + 1;
+    }
+
+    appointmentFile.close();
 }
 
 //HELPER FUNCTIONS
@@ -519,4 +612,3 @@ int main() {
     cout << "Goodbye!\n";
     return 0;
 }
-
